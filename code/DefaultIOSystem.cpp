@@ -69,6 +69,19 @@ using namespace Assimp;
 #   define PATHLIMIT 4096
 #endif
 
+// Custom IsTextUnicode function for Universal Windows Platform Support.
+namespace Assimp
+{
+    BOOL IsTextUnicode(
+    _In_        const VOID  *lpv,
+    _In_              int   iSize,
+    _Inout_opt_       LPINT lpiResult
+    )
+    {
+        return false;
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
@@ -76,7 +89,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
 
-    bool isUnicode = IsTextUnicode(pFile, strlen(pFile), NULL);
+    bool isUnicode = Assimp::IsTextUnicode(pFile, strlen(pFile), NULL);
     if (isUnicode) {
 
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);
@@ -110,7 +123,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     FILE* file;
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
-    bool isUnicode = IsTextUnicode(strFile, strlen(strFile), NULL );
+    bool isUnicode = Assimp::IsTextUnicode(strFile, strlen(strFile), NULL );
     if (isUnicode) {
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, strFile, -1, fileName16, PATHLIMIT);
         std::string mode8(strMode);
@@ -158,7 +171,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
-    bool isUnicode = IsTextUnicode(in, strlen(in), NULL);
+    bool isUnicode = Assimp::IsTextUnicode(in, strlen(in), NULL);
     if (isUnicode) {
         wchar_t out16[PATHLIMIT];
         wchar_t in16[PATHLIMIT];
